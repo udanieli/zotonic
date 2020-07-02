@@ -292,7 +292,7 @@ handle_cast({bounced, Peer, BounceEmail}, State) ->
             z_notifier:notify(#zlog{
                                 user_id=z_acl:user(Context),
                                 props=#log_email{
-                                    severity = ?LOG_ERROR,
+                                    severity = ?LOG_LEVEL_ERROR,
                                     message_nr = MsgId,
                                     mailer_status = bounce,
                                     mailer_host = z_convert:ip_to_list(Peer),
@@ -314,7 +314,7 @@ handle_cast({bounced, Peer, BounceEmail}, State) ->
                     z_notifier:notify(#zlog{
                                 user_id=undefined,
                                 props=#log_email{
-                                    severity = ?LOG_WARNING,
+                                    severity = ?LOG_LEVEL_WARNING,
                                     message_nr = MsgId,
                                     mailer_status = bounce,
                                     mailer_host = z_convert:ip_to_list(Peer),
@@ -410,7 +410,7 @@ handle_delivery_report(permanent_failure, MsgId, Recipient, OptMessage, Context)
     z_notifier:notify(#zlog{
             user_id = z_acl:user(Context),
             props = #log_email{
-                    severity = ?LOG_ERROR,
+                    severity = ?LOG_LEVEL_ERROR,
                     message_nr = MsgId,
                     mailer_status = bounce,
                     mailer_message = OptMessage,
@@ -435,7 +435,7 @@ handle_delivery_report(temporary_failure, MsgId, Recipient, OptMessage, Context)
     z_notifier:notify(#zlog{
             user_id = z_acl:user(Context),
             props = #log_email{
-                    severity = ?LOG_WARNING,
+                    severity = ?LOG_LEVEL_WARNING,
                     message_nr = MsgId,
                     mailer_status = retry,
                     mailer_message = OptMessage,
@@ -456,7 +456,7 @@ handle_delivery_report(sent, MsgId, Recipient, OptMessage, Context) ->
     z_notifier:notify(#zlog{
             user_id = z_acl:user(Context),
             props = #log_email{
-                    severity = ?LOG_INFO,
+                    severity = ?LOG_LEVEL_INFO,
                     message_nr = MsgId,
                     mailer_status = sent,
                     mailer_message = OptMessage,
@@ -477,7 +477,7 @@ handle_delivery_report(received, MsgId, Recipient, OptMessage, Context) ->
     z_notifier:notify(#zlog{
             user_id = z_acl:user(Context),
             props = #log_email{
-                    severity = ?LOG_INFO,
+                    severity = ?LOG_LEVEL_INFO,
                     message_nr = MsgId,
                     mailer_status = received,
                     mailer_message = OptMessage,
@@ -649,7 +649,7 @@ spawn_send_check_email(Id, Recipient, Email, RetryCt, Context, State) ->
 drop_blocked_email(Id, Recipient, Email, Context) ->
     delete_emailq(Id),
     LogEmail = #log_email{
-        severity = ?LOG_ERROR,
+        severity = ?LOG_LEVEL_ERROR,
         mailer_status = error,
         mailer_message = <<"Recipient blocked">>,
         props = [{reason, recipient_blocked}],
@@ -677,7 +677,7 @@ delete_email(Error, Id, Recipient, Email, Context) ->
             reason=Error
         }, Context),
     LogEmail = #log_email{
-        severity = ?LOG_ERROR,
+        severity = ?LOG_LEVEL_ERROR,
         mailer_status = error,
         props=[{reason, Error}],
         message_nr = Id,
@@ -775,7 +775,7 @@ spawned_email_sender_loop(Id, MessageId, Recipient, RecipientEmail, VERP, From,
             },
             z_notifier:notify(#zlog{
                                 user_id=LogEmail#log_email.from_id,
-                                props=LogEmail#log_email{severity=?LOG_INFO, mailer_status=sending}
+                                props=LogEmail#log_email{severity=?LOG_LEVEL_INFO, mailer_status=sending}
                               }, Context),
 
             lager:info("[smtp] Sending email to \"~s\" (~s), via relay \"~s\"",
@@ -798,7 +798,7 @@ spawned_email_sender_loop(Id, MessageId, Recipient, RecipientEmail, VERP, From,
                             z_notifier:notify(#zlog{
                                                 user_id=LogEmail#log_email.from_id,
                                                 props=LogEmail#log_email{
-                                                        severity = ?LOG_WARNING,
+                                                        severity = ?LOG_LEVEL_WARNING,
                                                         mailer_status = retry,
                                                         mailer_message = message(Message),
                                                         mailer_host = Host
@@ -818,7 +818,7 @@ spawned_email_sender_loop(Id, MessageId, Recipient, RecipientEmail, VERP, From,
                             z_notifier:notify(#zlog{
                                                 user_id=LogEmail#log_email.from_id,
                                                 props=LogEmail#log_email{
-                                                        severity = ?LOG_ERROR,
+                                                        severity = ?LOG_LEVEL_ERROR,
                                                         mailer_status = bounce,
                                                         mailer_message = z_convert:to_binary(Message),
                                                         mailer_host = Host
@@ -839,7 +839,7 @@ spawned_email_sender_loop(Id, MessageId, Recipient, RecipientEmail, VERP, From,
                     z_notifier:notify(#zlog{
                                         user_id=LogEmail#log_email.from_id,
                                         props=LogEmail#log_email{
-                                                severity = ?LOG_ERROR,
+                                                severity = ?LOG_LEVEL_ERROR,
                                                 mailer_status = error,
                                                 props = [{reason, z_convert:to_binary(Reason)}]
                                             }
@@ -855,7 +855,7 @@ spawned_email_sender_loop(Id, MessageId, Recipient, RecipientEmail, VERP, From,
                     z_notifier:notify(#zlog{
                                         user_id=LogEmail#log_email.from_id,
                                         props=LogEmail#log_email{
-                                                severity = ?LOG_INFO,
+                                                severity = ?LOG_LEVEL_INFO,
                                                 mailer_status = sent,
                                                 mailer_message = Receipt
                                             }
