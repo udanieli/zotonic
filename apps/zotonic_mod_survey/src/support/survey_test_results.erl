@@ -41,7 +41,7 @@ calc_test_results(SurveyId, Answers, Context) ->
 count_points([], _Blocks, PtAcc, AsAcc, _Context) ->
     {PtAcc, lists:reverse(AsAcc)};
 count_points([{Name,A}|As], Blocks, PtAcc, AsAcc, Context) ->
-    Block = find_block(maps:get(<<"block">>, A, undefined), Blocks),
+    Block = find_block(proplists:get_value(block, A, undefined), Blocks),
     case z_convert:to_bool(maps:get(<<"is_test">>, Block, false)) of
         true ->
             % Check if given answer is correct
@@ -57,7 +57,7 @@ question_points(<<"survey_thurstone">>, A, Block, Context) ->
         GoodPoints when is_integer(GoodPoints) ->
             Props = filter_survey_prepare_thurstone:survey_prepare_thurstone(Block, false, Context),
             QuestionOptions = maps:get(<<"answers">>, Props, []),
-            Answered = make_list(maps:get(<<"answer">>, A, undefined)),
+            Answered = make_list(proplists:get(<<"answer">>, A, undefined)),
             IsMulti = survey_q_thurstone:is_multiple(Block),
             WrongPoints = case IsMulti of
                 true ->
